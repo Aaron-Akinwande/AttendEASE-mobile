@@ -6,7 +6,7 @@ import Dashboard from './screens/Dashboard';
 import Notifications from './screens/Notifications';
 import Profile from './screens/Profile';
 import Classes from './screens/Classes';
-// import ScanAttendance from './screens/ClassScan';
+import ScanAttendance from './screens/ClassScan';
 
 const Stack = createStackNavigator();
 
@@ -19,7 +19,7 @@ export default function App() {
         <Stack.Screen name="Notifications" component={Notifications} />
         <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen name="Classes" component={Classes} />
-        {/* <Stack.Screen name="Class Scan" component={ScanAttendance} /> */}
+        <Stack.Screen name="Class Scan" component={ScanAttendance} />
       </Stack.Navigator>
     </NavigationContainer>
   );
