@@ -39,10 +39,28 @@ const Classes = () => {
       lecturer: "Prof. Robert Green",
       attendancePercentage: 92,
     },
+    {
+      id: 5,
+      className: "History 404",
+      lecturer: "Prof. Robert Green",
+      attendancePercentage: 92,
+    },
+    {
+      id: 6,
+      className: "History 404",
+      lecturer: "Prof. Robert Green",
+      attendancePercentage: 92,
+    },
+    {
+      id: 7,
+      className: "History 404",
+      lecturer: "Prof. Robert Green",
+      attendancePercentage: 92,
+    },
   ];
 
   const handleClassClick = (classId) => {
-    // navigation.navigate("Class Scan", { classId });
+    navigation.navigate("Class Scan", { classId });
   };
 
   const renderClassItem = ({ item }) => (
