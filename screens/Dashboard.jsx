@@ -28,45 +28,45 @@ const Dashboard = () => {
 
   return (
     <BottomMenu>
-    <View style={styles.container}>
-      <Text style={styles.header}>Student Dashboard</Text>
+    <View className='flex-1 bg-blue-100 p-4'>
+      <Text className='text-2xl font-bold text-gray-800 text-center mb-4'>Student Dashboard</Text>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Attendance Records</Text>
+      <View className='bg-white rounded-lg p-4 mb-4 shadow-md shadow-black/10'>
+        <Text className='text-xl font-semibold mb-2.5 text-gray-800'>Attendance Records</Text>
         {attendanceRecords.map((record, index) => (
-          <View key={index} style={styles.listItem}>
+          <View key={index} className='flex flex-row justify-between items-center border-b border-gray-300 py-2'>
             <Text>{record.date}</Text>
-            <View style={styles.statusContainer}>
+            <View className='flex flex-row items-center'>
               <Icon
                 name={record.status === 'Present' ? 'check-circle' : 'times-circle'}
                 size={20}
                 color={record.status === 'Present' ? 'green' : 'red'}
               />
-              <Text style={styles.statusText}>{record.status}</Text>
+              <Text className='ml-2 text-base'>{record.status}</Text>
             </View>
           </View>
         ))}
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Upcoming Classes</Text>
+      <View className='bg-white rounded-lg p-4 mb-4 shadow-md shadow-black/10'>
+        <Text className='text-xl font-semibold mb-2.5 text-gray-800'>Upcoming Classes</Text>
         {upcomingClasses.map((cls, index) => (
-          <View key={index} style={styles.listItem}>
-            <View style={styles.classInfo}>
+          <View key={index} className='flex flex-row justify-between items-center border-b border-gray-300 py-2'>
+            <View className='flex flex-row items-center'>
               <Icon name="calendar" size={20} color="#2563eb" />
-              <Text style={styles.classText}>{cls.course}</Text>
+              <Text className='ml-2 text-base'>{cls.course}</Text>
             </View>
             <Text>{cls.date} at {cls.time}</Text>
           </View>
         ))}
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Notifications</Text>
+      <View className='bg-white rounded-lg p-4 mb-4 shadow-md shadow-black/10'>
+        <Text className='text-xl font-semibold mb-2.5 text-gray-800'>Notifications</Text>
         {notifications.map((notification, index) => (
           <TouchableOpacity 
             key={index} 
-            style={styles.listItem}
+            className='flex flex-row justify-between items-center border-b border-gray-300 py-2'
             onPress={() => navigation.navigate('Notifications')}  
           >
             <Icon
@@ -74,7 +74,7 @@ const Dashboard = () => {
               size={20}
               color={notification.type === 'alert' ? 'red' : '#2563eb'}
             />
-            <Text style={styles.notificationText}>{notification.message}</Text>
+            <Text className='ml-2 text-base'>{notification.message}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -83,63 +83,63 @@ const Dashboard = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#e0f2fe',
-    padding: 16,
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  section: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 10,
-    color: '#1f2937',
-  },
-  listItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    paddingVertical: 8,
-  },
-  statusContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  statusText: {
-    marginLeft: 8,
-    fontSize: 16,
-  },
-  classInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  classText: {
-    marginLeft: 8,
-    fontSize: 16,
-  },
-  notificationText: {
-    marginLeft: 8,
-    fontSize: 16,
-  },
-});
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     backgroundColor: '#e0f2fe',
+//     padding: 16,
+//   },
+//   header: {
+//     fontSize: 24,
+//     fontWeight: 'bold',
+//     color: '#1f2937',
+//     textAlign: 'center',
+//     marginBottom: 16,
+//   },
+//   section: {
+//     backgroundColor: '#fff',
+//     borderRadius: 10,
+//     padding: 16,
+//     marginBottom: 16,
+//     shadowColor: '#000',
+//     shadowOpacity: 0.1,
+//     shadowRadius: 6,
+//     elevation: 4,
+//   },
+//   sectionTitle: {
+//     fontSize: 20,
+//     fontWeight: '600',
+//     marginBottom: 10,
+//     color: '#1f2937',
+//   },
+//   listItem: {
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     alignItems: 'center',
+//     borderBottomWidth: 1,
+//     borderBottomColor: '#ccc',
+//     paddingVertical: 8,
+//   },
+//   statusContainer: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//   },
+//   statusText: {
+//     marginLeft: 8,
+//     fontSize: 16,
+//   },
+//   classInfo: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//   },
+//   classText: {
+//     marginLeft: 8,
+//     fontSize: 16,
+//   },
+//   notificationText: {
+//     marginLeft: 8,
+//     fontSize: 16,
+//   },
+// });
 
 export default Dashboard;

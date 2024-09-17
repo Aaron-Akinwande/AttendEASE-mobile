@@ -7,6 +7,9 @@ import Notifications from './screens/Notifications';
 import Profile from './screens/Profile';
 import Classes from './screens/Classes';
 import ScanAttendance from './screens/ClassScan';
+import Test from './screens/Test';
+
+
 
 const Stack = createStackNavigator();
 
@@ -15,6 +18,7 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Login">
         <Stack.Screen name="Login" component={StudentLogin} />
+        <Stack.Screen name="Test" component={Test} />
         <Stack.Screen name="Dashboard" component={Dashboard} />
         <Stack.Screen name="Notifications" component={Notifications} />
         <Stack.Screen name="Profile" component={Profile} />

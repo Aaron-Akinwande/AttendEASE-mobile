@@ -65,12 +65,12 @@ const Classes = () => {
 
   const renderClassItem = ({ item }) => (
     <TouchableOpacity
-      style={styles.classItem}
+      className="bg-white p-4 mb-3 rounded-lg shadow-md shadow-black/10"
       onPress={() => handleClassClick(item.id)}
     >
-      <Text style={styles.className}>{item.className}</Text>
-      <Text style={styles.lecturer}>Lecturer: {item.lecturer}</Text>
-      <Text style={styles.attendance}>
+      <Text className="text-lg font-semibold mb-2 text-gray-800">{item.className}</Text>
+      <Text className="text-base text-gray-600 mb-1">Lecturer: {item.lecturer}</Text>
+      <Text className="text-sm text-teal-500">
         Attendance: {item.attendancePercentage}%
       </Text>
     </TouchableOpacity>
@@ -78,61 +78,62 @@ const Classes = () => {
 
   return (
     <BottomMenu>
-      <View style={styles.container}>
-        <Text style={styles.header}>Class Attendance Records</Text>
+      <View className="flex-1 bg-blue-100 px-4 py-5">
+        <Text className="text-2xl font-bold text-center text-gray-800 mb-5">Class Attendance Records</Text>
         <FlatList
           data={classes}
           renderItem={renderClassItem}
           keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={styles.listContainer}
+          // contentContainerStyle={styles.listContainer}
+          className=" pb-24"
         />
       </View>
     </BottomMenu>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#e0f2fe",
-    paddingHorizontal: 16,
-    paddingVertical: 20,
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#1f2937",
-    marginBottom: 20,
-  },
-  listContainer: {
-    paddingBottom: 100, 
-  },
-  classItem: {
-    backgroundColor: "#fff",
-    padding: 16,
-    marginBottom: 12,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  className: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 8,
-    color: "#1f2937",
-  },
-  lecturer: {
-    fontSize: 16,
-    color: "#4b5563",
-    marginBottom: 4,
-  },
-  attendance: {
-    fontSize: 14,
-    color: "#10b981",
-  },
-});
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     backgroundColor: "#e0f2fe",
+//     paddingHorizontal: 16,
+//     paddingVertical: 20,
+//   },
+//   header: {
+//     fontSize: 24,
+//     fontWeight: "bold",
+//     textAlign: "center",
+//     color: "#1f2937",
+//     marginBottom: 20,
+//   },
+//   listContainer: {
+//     paddingBottom: 100, 
+//   },
+//   classItem: {
+//     backgroundColor: "#fff",
+//     padding: 16,
+//     marginBottom: 12,
+//     borderRadius: 10,
+//     shadowColor: "#000",
+//     shadowOpacity: 0.1,
+//     shadowRadius: 6,
+//     elevation: 3,
+//   },
+//   className: {
+//     fontSize: 18,
+//     fontWeight: "600",
+//     marginBottom: 8,
+//     color: "#1f2937",
+//   },
+//   lecturer: {
+//     fontSize: 16,
+//     color: "#4b5563",
+//     marginBottom: 4,
+//   },
+//   attendance: {
+//     fontSize: 14,
+//     color: "#10b981",
+//   },
+// });
 
 export default Classes;
