@@ -1,145 +1,93 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
 import BottomMenu from '../components/BottomMenu';
+import { getRequest } from '../api/apiCall'; // Assuming you have a fetch API utility
+import { STUDENT } from '../api/apiURL'; // The URL to fetch student details
+import { useQuery } from '@tanstack/react-query';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { queryKeys } from '../api/queryKey';
 
-
-const attendanceRecords = [
-  { date: '2024-09-01', status: 'Present' },
-  { date: '2024-09-02', status: 'Absent' },
-  { date: '2024-09-03', status: 'Present' },
-];
-
-const upcomingClasses = [
-  { course: 'Mathematics 101', date: '2024-09-10', time: '10:00 AM' },
-  { course: 'History 202', date: '2024-09-11', time: '2:00 PM' },
-];
-
-const notifications = [
-  { message: 'Attendance below 75% in Physics 102', type: 'alert' },
-  { message: 'Upcoming quiz in Biology 105', type: 'info' },
-];
 
 const Dashboard = () => {
-  const navigation = useNavigation();  
+  const navigation = useNavigation();
+  const [studentId, setStudentId] = useState(null);
+  const [adminId, setAdminId] = useState(null);
 
 
+  useEffect(() => {
+    const fetchIds = async () => {
+      const storedAdminId = await AsyncStorage.getItem('adminID');
+      const storedStudentId = await AsyncStorage.getItem('studID');
+      if (storedAdminId && storedStudentId) {
+        setAdminId(storedAdminId);
+        setStudentId(storedStudentId);
+      }
+    };
+    fetchIds();
+  }, []);
+  
+  // Fetch student details from API
+  const { data: studentDetails, isLoading, isError } = useQuery({
+    queryKey: [queryKeys.getstudent,adminId, studentId],
+    queryFn: () => getRequest({ url: STUDENT(adminId, studentId) }), // Fetching details for student ID 1 as an example
+  });
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 bg-blue-100 p-4 justify-center items-center">
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (isError) {
+    return (
+      <View className="flex-1 bg-blue-100 p-4 justify-center items-center">
+        <Text>Error fetching student details.</Text>
+      </View>
+    );
+  }
+
+  const { fullName, department, courses } = studentDetails;
 
   return (
     <BottomMenu>
-    <View className='flex-1 bg-blue-100 p-4'>
-      <Text className='text-2xl font-bold text-gray-800 text-center mb-4'>Student Dashboard</Text>
+      <View className="flex-1 bg-blue-100 p-4">
+        <Text className="text-2xl font-bold text-gray-800 text-center mb-4">Student Dashboard</Text>
 
-      <View className='bg-white rounded-lg p-4 mb-4 shadow-md shadow-black/10'>
-        <Text className='text-xl font-semibold mb-2.5 text-gray-800'>Attendance Records</Text>
-        {attendanceRecords.map((record, index) => (
-          <View key={index} className='flex flex-row justify-between items-center border-b border-gray-300 py-2'>
-            <Text>{record.date}</Text>
-            <View className='flex flex-row items-center'>
-              <Icon
-                name={record.status === 'Present' ? 'check-circle' : 'times-circle'}
-                size={20}
-                color={record.status === 'Present' ? 'green' : 'red'}
-              />
-              <Text className='ml-2 text-base'>{record.status}</Text>
+        {/* Student Information */}
+        <View className="bg-white rounded-lg p-4 mb-4 shadow-md shadow-black/10">
+          <Text className="text-xl font-semibold text-gray-800 mb-2.5">Student Information</Text>
+          <Text className="text-base text-gray-600">Name: {fullName}</Text>
+          <Text className="text-base text-gray-600">Department: {department}</Text>
+        </View>
+
+        {/* Course Attendance Records */}
+        <View className="bg-white rounded-lg p-4 mb-4 shadow-md shadow-black/10">
+          <Text className="text-xl font-semibold text-gray-800 mb-2.5">Course Attendance</Text>
+          {courses.map((course, index) => (
+            <View key={index} className="flex flex-row justify-between items-center border-b border-gray-300 py-2">
+              <View className="flex flex-row items-center">
+                <Icon name="book" size={20} color="#2563eb" />
+                <Text className="ml-2 text-base">{course.courseName}</Text>
+              </View>
+              <Text>{course.attendancePercentage}%</Text>
             </View>
-          </View>
-        ))}
-      </View>
+          ))}
+        </View>
 
-      <View className='bg-white rounded-lg p-4 mb-4 shadow-md shadow-black/10'>
-        <Text className='text-xl font-semibold mb-2.5 text-gray-800'>Upcoming Classes</Text>
-        {upcomingClasses.map((cls, index) => (
-          <View key={index} className='flex flex-row justify-between items-center border-b border-gray-300 py-2'>
-            <View className='flex flex-row items-center'>
-              <Icon name="calendar" size={20} color="#2563eb" />
-              <Text className='ml-2 text-base'>{cls.course}</Text>
-            </View>
-            <Text>{cls.date} at {cls.time}</Text>
-          </View>
-        ))}
+        {/* Navigate to Detailed Attendance */}
+        <TouchableOpacity
+          className="bg-blue-500 p-3.5 rounded-lg items-center"
+          onPress={() => navigation.navigate('Courses')}
+        >
+          <Text className="text-lg font-bold text-white">View Attendance Details</Text>
+        </TouchableOpacity>
       </View>
-
-      <View className='bg-white rounded-lg p-4 mb-4 shadow-md shadow-black/10'>
-        <Text className='text-xl font-semibold mb-2.5 text-gray-800'>Notifications</Text>
-        {notifications.map((notification, index) => (
-          <TouchableOpacity 
-            key={index} 
-            className='flex flex-row justify-between items-center border-b border-gray-300 py-2'
-            onPress={() => navigation.navigate('Notifications')}  
-          >
-            <Icon
-              name="bell"
-              size={20}
-              color={notification.type === 'alert' ? 'red' : '#2563eb'}
-            />
-            <Text className='ml-2 text-base'>{notification.message}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </View>
     </BottomMenu>
   );
 };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#e0f2fe',
-//     padding: 16,
-//   },
-//   header: {
-//     fontSize: 24,
-//     fontWeight: 'bold',
-//     color: '#1f2937',
-//     textAlign: 'center',
-//     marginBottom: 16,
-//   },
-//   section: {
-//     backgroundColor: '#fff',
-//     borderRadius: 10,
-//     padding: 16,
-//     marginBottom: 16,
-//     shadowColor: '#000',
-//     shadowOpacity: 0.1,
-//     shadowRadius: 6,
-//     elevation: 4,
-//   },
-//   sectionTitle: {
-//     fontSize: 20,
-//     fontWeight: '600',
-//     marginBottom: 10,
-//     color: '#1f2937',
-//   },
-//   listItem: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     alignItems: 'center',
-//     borderBottomWidth: 1,
-//     borderBottomColor: '#ccc',
-//     paddingVertical: 8,
-//   },
-//   statusContainer: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//   },
-//   statusText: {
-//     marginLeft: 8,
-//     fontSize: 16,
-//   },
-//   classInfo: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//   },
-//   classText: {
-//     marginLeft: 8,
-//     fontSize: 16,
-//   },
-//   notificationText: {
-//     marginLeft: 8,
-//     fontSize: 16,
-//   },
-// });
 
 export default Dashboard;

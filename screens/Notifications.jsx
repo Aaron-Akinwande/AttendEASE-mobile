@@ -1,22 +1,42 @@
-import React from "react";
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, FlatList, ActivityIndicator, Button } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import BottomMenu from "../components/BottomMenu";
-
-const notifications = [
-  { message: "Upcoming class reminder: Mathematics 101", type: "info" },
-  { message: "Attendance below 75% in Physics 102", type: "warning" },
-  { message: "System maintenance on September 15th", type: "alert" },
-];
+import { useQuery } from '@tanstack/react-query';
+import { getRequest } from "../api/apiCall"; // Ensure this is your request function
+import { NOTIFICATIONS } from "../api/apiURL"; // Your API URL for notifications
+import { queryKeys } from "../api/queryKey";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Notifications = () => {
+  const [adminId, setAdminId] = useState(null);
+
+  useEffect(() => {
+    const fetchIds = async () => {
+      const storedAdminId = await AsyncStorage.getItem('adminID');
+      if (storedAdminId) {
+        setAdminId(storedAdminId);
+      }
+    };
+    fetchIds();
+  }, []);
+  
+  // Fetch notifications using tanstack query
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: [queryKeys.getNotifications, adminId], 
+    queryFn: async () => await getRequest({ url: NOTIFICATIONS(adminId) }), 
+    onError: (error) => console.error("Error fetching notifications:", error),
+  });
+
   const renderNotification = ({ item }) => (
     <View
-      className={`flex  flex-row items-center p-4 rounded-lg mb-3 bg-white border-l-4 border-gray-300 ${item.type === 'alert'
-      ? `border-l-4 border-red-500 `
-      : item.type === 'warning'
-      ? `border-l-4 border-yellow-500 `
-      : `border-l-4 border-green-500 `}`}
+      className={`flex flex-row items-center p-4 rounded-lg mb-3 bg-white border-l-4 border-gray-300 ${
+        item.type === 'alert'
+          ? `border-l-4 border-red-500 `
+          : item.type === 'warning'
+          ? `border-l-4 border-yellow-500 `
+          : `border-l-4 border-green-500 `
+      }`}
     >
       <Icon
         name={
@@ -40,6 +60,29 @@ const Notifications = () => {
     </View>
   );
 
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <BottomMenu>
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      </BottomMenu>
+    );
+  }
+
+  // Handle error state
+  if (isError) {
+    return (
+      <BottomMenu>
+        <View className="flex-1 justify-center items-center">
+          <Text>Error fetching notifications.</Text>
+          <Button title="Retry" onPress={refetch} />
+        </View>
+      </BottomMenu>
+    );
+  }
+
   return (
     <BottomMenu>
       <View className="flex-1 bg-blue-100 p-4">
@@ -47,7 +90,7 @@ const Notifications = () => {
           Notifications
         </Text>
         <FlatList
-          data={notifications}
+          data={data} // Use the fetched data
           keyExtractor={(item, index) => index.toString()}
           renderItem={renderNotification}
         />
@@ -55,49 +98,5 @@ const Notifications = () => {
     </BottomMenu>
   );
 };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: "#e0f2fe",
-//     padding: 16,
-//   },
-//   header: {
-//     fontSize: 24,
-//     fontWeight: "bold",
-//     textAlign: "center",
-//     color: "#1f2937",
-//     marginBottom: 16,
-//   },
-//   notificationContainer: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//     padding: 16,
-//     borderRadius: 8,
-//     marginBottom: 12,
-//     backgroundColor: "#fff",
-//     borderLeftWidth: 4,
-//   },
-//   alertNotification: {
-//     borderLeftColor: "red",
-//     backgroundColor: "#ffe5e5",
-//   },
-//   warningNotification: {
-//     borderLeftColor: "yellow",
-//     backgroundColor: "#fffde5",
-//   },
-//   infoNotification: {
-//     borderLeftColor: "green",
-//     backgroundColor: "#e5f1ff",
-//   },
-//   icon: {
-//     marginRight: 10,
-//   },
-//   messageText: {
-//     flex: 1,
-//     fontSize: 16,
-//     color: "#1f2937",
-//   },
-// });
 
 export default Notifications;
