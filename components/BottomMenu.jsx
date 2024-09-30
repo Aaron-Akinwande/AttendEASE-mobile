@@ -5,7 +5,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 
 const BottomMenu = ({ children }) => {
   const navigation = useNavigation();
-  const [activeTab, setActiveTab] = useState("Home");
+  const [activeTab, setActiveTab] = useState("Dashboard");
 
   const navigate = (route) => {
     setActiveTab(route);
@@ -59,21 +59,21 @@ const BottomMenu = ({ children }) => {
 
         <TouchableOpacity
           className="flex justify-center items-center"
-          onPress={() => navigate("Classes")}
+          onPress={() => navigate("Courses")}
         >
           <Icon
             name="book"
-            color={activeTab === "Classes" ? "blue" : "gray"}
+            color={activeTab === "Courses" ? "blue" : "gray"}
             size={24}
           />
           <Text
             className={`${
-              activeTab === "Classes"
+              activeTab === "Courses"
                 ? `text-blue-500 text-xs`
                 : `text-gray-500 text-xs`
             }`}
           >
-            Classes
+            Courses
           </Text>
         </TouchableOpacity>
 
@@ -103,12 +103,12 @@ const BottomMenu = ({ children }) => {
         >
           <Icon
             name="sign-out"
-            color={activeTab === "Login" ? "blue" : "gray"}
+            color={activeTab === "Logout" ? "blue" : "gray"}
             size={24}
           />
           <Text
             className={`${
-              activeTab === "Login"
+              activeTab === "Logout"
                 ? `text-blue-500 text-xs`
                 : `text-gray-500 text-xs`
             }`}
@@ -120,37 +120,5 @@ const BottomMenu = ({ children }) => {
     </View>
   );
 };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: "#f0f0f0",
-//   },
-//   content: {
-//     flex: 1,
-//     padding: 16,
-//   },
-//   menu: {
-//     flexDirection: "row",
-//     justifyContent: "space-around",
-//     alignItems: "center",
-//     backgroundColor: "#fff",
-//     paddingVertical: 10,
-//     borderTopWidth: 1,
-//     borderTopColor: "#ddd",
-//   },
-//   menuItem: {
-//     justifyContent: "center",
-//     alignItems: "center",
-//   },
-//   text: {
-//     color: "gray",
-//     fontSize: 12,
-//   },
-//   activeText: {
-//     color: "blue",
-//     fontSize: 12,
-//   },
-// });
 
 export default BottomMenu;

@@ -5,17 +5,41 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  StyleSheet,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
+import { useMutation } from '@tanstack/react-query';
+import { STUD_LOGIN } from "../api/apiURL";
+import { login } from "../api/apiCall";
 
 export default function StudentLogin() {
   const navigation = useNavigation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const { mutate, isLoading, isError, error } = useMutation({
+    mutationFn: async (newLogin) =>
+      await login({ url: STUD_LOGIN, data: newLogin }),
+    onSuccess: async (data) => {
+      try {
+        const adminID = JSON.stringify(data.adminId); 
+        const studID = JSON.stringify(data.id); 
+        // console.log(studID)
+        await AsyncStorage.setItem('adminID', adminID);
+        await AsyncStorage.setItem('studID', studID);
+        navigation.navigate("Dashboard");
+      } catch (e) {
+        console.error('Failed to save adminID:', e);
+      }
+    },
+    onError: (error) => {
+      console.error("")
+      console.error('Login failed:', error.message);
+    },
+  });
+
   const handleLogin = () => {
-    navigation.navigate("Dashboard");
+    mutate({ email, password });
   };
 
   return (
@@ -55,99 +79,16 @@ export default function StudentLogin() {
           />
         </View>
 
-        <TouchableOpacity className="bg-blue-600 py-3 rounded-md items-center" onPress={handleLogin}>
-          <Text className="text-white text-base font-bold">Login</Text>
-        </TouchableOpacity>
+        {isError && <Text className="text-red-600 text-sm">Error: {error.message}</Text>}
 
-        {/* <Text style={styles.registerText}>
-          Don't have an account?{' '}
-          <Text style={styles.registerLink} 
-        //   onPress={() => navigation.navigate('Register')}
-          >
-            Register
-          </Text>
-        </Text> */}
+        <TouchableOpacity
+          className="bg-blue-600 py-3 rounded-md items-center"
+          onPress={handleLogin}
+          disabled={isLoading}
+        >
+          <Text className="text-white text-base font-bold">{isLoading ? 'Logging in...' : 'Login'}</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     justifyContent: "center",
-//     alignItems: "center",
-//     backgroundColor: "#3b82f6",
-//   },
-//   loginBox: {
-//     backgroundColor: "#fff",
-//     borderRadius: 10,
-//     padding: 20,
-//     width: "90%",
-//     maxWidth: 400,
-//     minHeight: "50%",
-//     justifyContent: "center",
-//     shadowColor: "#000",
-//     shadowOpacity: 0.2,
-//     shadowRadius: 8,
-//     elevation: 5,
-//   },
-//   logoContainer: {
-//     flexDirection: "row",
-//     justifyContent: "center",
-//     alignItems: "center",
-//     marginBottom: 20,
-//   },
-//   logo: {
-//     width: 50,
-//     height: 50,
-//     marginRight: 10,
-//   },
-//   logoText: {
-//     fontSize: 24,
-//     fontWeight: "bold",
-//     color: "#333",
-//   },
-//   loginHeader: {
-//     textAlign: "center",
-//     fontSize: 20,
-//     fontWeight: "bold",
-//     marginBottom: 20,
-//     color: "#333",
-//   },
-//   inputContainer: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//     borderWidth: 1,
-//     borderColor: "#ccc",
-//     borderRadius: 5,
-//     marginBottom: 20,
-//     paddingHorizontal: 10,
-//     paddingVertical: 8,
-//   },
-//   input: {
-//     flex: 1,
-//     fontSize: 16,
-//     paddingLeft: 10,
-//   },
-//   loginButton: {
-//     backgroundColor: "#2563eb",
-//     paddingVertical: 12,
-//     borderRadius: 5,
-//     alignItems: "center",
-//   },
-//   loginButtonText: {
-//     color: "#fff",
-//     fontSize: 16,
-//     fontWeight: "bold",
-//   },
-//   registerText: {
-//     marginTop: 20,
-//     textAlign: "center",
-//     color: "#6b7280",
-//   },
-//   registerLink: {
-//     color: "#2563eb",
-//     fontWeight: "bold",
-//   },
-// });

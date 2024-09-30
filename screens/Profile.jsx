@@ -1,34 +1,108 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   TextInput,
   Button,
-  StyleSheet,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Icon from "react-native-vector-icons/FontAwesome";
 import BottomMenu from "../components/BottomMenu";
+import { STUDENT } from "../api/apiURL"; // Import your API URL
+import { queryKeys } from "../api/queryKey";
+import { getRequest, patchRequest } from "../api/apiCall";
 
 const Profile = () => {
-  const [studentInfo, setStudentInfo] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "123-456-7890",
-    password: "password123",
-  });
-
   const [editMode, setEditMode] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const queryClient = useQueryClient();
+
+  const [studentId, setStudentId] = useState(null);
+  const [adminId, setAdminId] = useState(null);
+  const [studentInfo, setStudentInfo] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    password: "",
+  });
+
+  useEffect(() => {
+    const fetchIds = async () => {
+      const storedAdminId = await AsyncStorage.getItem('adminID');
+      const storedStudentId = await AsyncStorage.getItem('studID');
+      if (storedAdminId && storedStudentId) {
+        setAdminId(storedAdminId);
+        setStudentId(storedStudentId);
+      }
+    };
+    fetchIds();
+  }, []);
+
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: [queryKeys.getstudent, studentId, adminId],
+    queryFn: async () => await getRequest({ url: STUDENT(studentId, adminId) }),
+
+    onError: (error) => console.error("Error fetching student data:", error),
+  });
+
+  useEffect(() => {
+    if (data) {
+      setStudentInfo({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        phoneNumber: data.phoneNumber,
+        password: data.password,
+      });
+    }
+  }, [data]);
+
+  const mutation = useMutation({
+    mutationFn: async (updatedStudent) => {
+      console.log(updatedStudent)
+      await patchRequest({ url: STUDENT(studentId, adminId), data: [updatedStudent] });
+    },
+    onSuccess: (data) => {
+      setEditMode(false);
+      queryClient.invalidateQueries({ queryKey: [queryKeys.getstudent] });
+    },
+    onError: (error) => {
+      console.error("Error updating student profile:", error);
+    },
+  });
 
   const handleChange = (name, value) => {
     setStudentInfo({ ...studentInfo, [name]: value });
   };
 
   const handleSubmit = () => {
-    console.log("Profile updated:", studentInfo);
-    setEditMode(false);
+    mutation.mutate({ data: studentInfo });
   };
+
+  if (isLoading) {
+    return (
+      <BottomMenu>
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      </BottomMenu>
+    );
+  }
+
+  if (isError) {
+    return (
+      <BottomMenu>
+        <View className="flex-1 justify-center items-center">
+          <Text>Error fetching student data.</Text>
+          <Button title="Retry" onPress={refetch} />
+        </View>
+      </BottomMenu>
+    );
+  }
 
   return (
     <BottomMenu>
@@ -40,14 +114,28 @@ const Profile = () => {
         <View className="bg-white rounded-lg p-4 shadow-lg shadow-black/10">
           <View className=" mb-4">
             <Text className="text-base font-semibold mb-2 text-gray-800">
-              Name
+              First Name
             </Text>
             <TextInput
               className={`text-base border font-semibold mb-2 text-gray-800 p-2 rounded-lg ${
                 !editMode && `bg-gray-200 border-white`
               }`}
-              value={studentInfo.name}
-              onChangeText={(value) => handleChange("name", value)}
+              value={studentInfo.firstName}
+              onChangeText={(value) => handleChange("firstName", value)}
+              editable={editMode}
+            />
+          </View>
+
+          <View className=" mb-4">
+            <Text className="text-base font-semibold mb-2 text-gray-800">
+              Last Name
+            </Text>
+            <TextInput
+              className={`text-base border font-semibold mb-2 text-gray-800 p-2 rounded-lg ${
+                !editMode && `bg-gray-200 border-white`
+              }`}
+              value={studentInfo.lastName}
+              onChangeText={(value) => handleChange("lastName", value)}
               editable={editMode}
             />
           </View>
@@ -75,8 +163,8 @@ const Profile = () => {
               className={`text-base border font-semibold mb-2 text-gray-800 p-2 rounded-lg ${
                 !editMode && `bg-gray-200 border-white`
               }`}
-              value={studentInfo.phone}
-              onChangeText={(value) => handleChange("phone", value)}
+              value={studentInfo.phoneNumber}
+              onChangeText={(value) => handleChange("phoneNumber", value)}
               editable={editMode}
               keyboardType="phone-pad"
             />
@@ -123,6 +211,7 @@ const Profile = () => {
                   title="Save Changes"
                   color="#48bb78"
                   onPress={handleSubmit}
+                  disabled={mutation.isLoading}
                 />
               </>
             ) : (
@@ -138,62 +227,5 @@ const Profile = () => {
     </BottomMenu>
   );
 };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: "#e0f2fe",
-//     padding: 16,
-//   },
-//   header: {
-//     fontSize: 24,
-//     fontWeight: "bold",
-//     color: "#1f2937",
-//     textAlign: "center",
-//     marginBottom: 16,
-//   },
-//   form: {
-//     backgroundColor: "#fff",
-//     borderRadius: 10,
-//     padding: 16,
-//     shadowColor: "#000",
-//     shadowOpacity: 0.1,
-//     shadowRadius: 6,
-//     elevation: 4,
-//   },
-//   inputContainer: {
-//     marginBottom: 16,
-//   },
-//   label: {
-//     fontSize: 16,
-//     fontWeight: "600",
-//     marginBottom: 8,
-//     color: "#1f2937",
-//   },
-//   input: {
-//     borderWidth: 1,
-//     borderColor: "#ccc",
-//     borderRadius: 5,
-//     padding: 10,
-//     fontSize: 16,
-//     backgroundColor: "#fff",
-//     width: "100%",
-//   },
-//   disabledInput: {
-//     backgroundColor: "#f0f0f0",
-//   },
-//   passwordContainer: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//   },
-//   icon: {
-//     marginLeft: -35,
-//   },
-//   buttonContainer: {
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//     marginTop: 16,
-//   },
-// });
 
 export default Profile;

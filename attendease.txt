@@ -1,0 +1,136 @@
+For the lecturer module of the online attendance management system, the following pages are typically required to provide a comprehensive set of features that cater to the needs of the lecturers:
+
+1. **Dashboard Page**: An overview page that provides a summary of key metrics, such as recent classes, overall attendance statistics, upcoming lectures, and notifications.
+
+2. **Attendance Management Page**: A page where lecturers can take attendance for their current classes. This page allows them to scan barcodes, manually mark attendance, and view real-time attendance data.
+
+3. **Class Management Page**: This page allows lecturers to manage their classes, including creating new classes, editing existing ones, and assigning students to classes.
+
+4. **Attendance Reports Page**: A page dedicated to generating and viewing detailed attendance reports for different classes over specific periods. Lecturers can filter reports by date, class, or individual student.
+
+5. **Student Performance Page**: A page where lecturers can monitor and analyze student performance based on attendance records and other metrics, such as participation or assignment submissions.
+
+6. **Notifications Page**: This page allows lecturers to send notifications or alerts to students regarding attendance issues, class announcements, or other important information.
+
+7. **Profile Page**: A page where lecturers can view and edit their profile information, including personal details, contact information, and password settings.
+
+*8. **Settings Page**: A page for adjusting system settings specific to the lecturer’s preferences, such as notification preferences, default view settings, and language options.
+
+*9. **Help and Support Page**: A page that provides resources, FAQs, and contact information for technical support to assist lecturers with any issues they may encounter.
+
+*10. **Logout Page**: A dedicated page or button to safely log out of the system, ensuring the security of the lecturer’s account.
+
+These pages collectively support the functionalities required by lecturers to manage attendance efficiently, track student performance, and maintain effective communication within the system.
+
+
+For the **Student Module** of the online barcode attendance system, the following pages are required:
+
+1. **Dashboard Page**: A page providing students with an overview of their attendance records, upcoming classes, and any notifications or alerts regarding their attendance status.
+
+2. **Attendance Records Page**: A detailed view where students can see their attendance history for each class, including dates of attendance, absences, and any remarks from lecturers.
+
+3. **Profile Page**: A page for students to view and update their personal information, such as contact details and password.
+
+4. **Notifications Page**: A page that displays messages and alerts from lecturers or the administration, such as upcoming class reminders, attendance warnings, or system announcements.
+
+*5. **Support/Help Page**: A page where students can access help documentation, frequently asked questions (FAQs), and contact information for technical support or other inquiries related to the attendance system.
+
+
+ADMIN Module
+
+Admin Dashboard
+
+Overview of system stats (e.g., total students, lecturers, classes, etc.).
+Quick links to key actions like adding classes, viewing reports, and managing users.
+User Management
+
+Manage Students: A page to view, add, edit, and delete student profiles.
+Manage Lecturers: Similar to students but focused on managing lecturer profiles.
+Assign Roles: A page to assign or modify roles (e.g., student, lecturer, admin).
+Class Management
+
+View Classes: Display all classes with options to filter by subject, lecturer, or semester.
+Create Class: A form to add new classes and assign lecturers.
+Edit/Delete Class: Modify or remove class information.
+Assign Students: Assign or remove students from specific classes.
+Attendance Management
+
+View Attendance Records: A detailed view of student attendance per class or per student.
+Generate Reports: Export attendance reports based on time periods or specific classes.
+Mark/Override Attendance: Admins can manually mark or override attendance in special cases.
+Notifications Management
+
+Send Notifications: Send notifications to specific students, classes, or all users (for system-wide updates).
+View Notifications History: See all past notifications sent by the admin.
+Reports & Analytics
+
+Attendance Reports: Generate custom reports on student attendance, filtered by class, lecturer, or semester.
+User Activity Reports: View user login and activity history.
+Class Performance Reports: An overview of class performance metrics like attendance trends, highest/lowest attendance rates, etc.
+Settings
+
+System Settings: Adjust system-wide settings like attendance thresholds, notification preferences, etc.
+Account Settings: Manage the admin account details, passwords, and permissions.
+Feedback and Support
+
+View Feedback: Review feedback provided by students or lecturers.
+Contact Support: Admins can report issues or get in touch with the development team for technical support.
+
+
+
+
+---Student table
+ID
+Student Matric
+First name
+Last name
+Full name{First name + Last Name}
+Email
+Phone number
+Password{Initial Value:Last Name, New Value:Changeable}
+Array of courses offered[
+Course ID
+Course Name
+Course Lecturer
+Total Number of sessions
+Total Number of sessions Attended
+Attendance Percentage{ (Total Number of sessions Attended \ Total Number of sessions) * 100 }
+]
+
+---Lecturer Table
+
+ID
+First name
+Last name
+Full name{First name + Last Name}
+Email
+Phone number
+Password{Initial Value:Last Name, New Value:Changeable}
+Array of courses taught[
+Course ID
+Course Name
+Total Number of sessions
+Array of students in the course
+]
+
+---Course/Class Table
+
+Course ID
+Course Name
+Course Lecturer
+Array of students
+Total Number of sessions
+
+
+---Admin Table
+
+ID
+First name
+Last name
+Full name{First name + Last Name}
+Email
+Phone number
+Password{Initial Value:Last Name, New Value:Changeable}
+Array of all lecturers
+Array of all courses/classes
+Array of all students 
