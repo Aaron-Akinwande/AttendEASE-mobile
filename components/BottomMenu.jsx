@@ -1,16 +1,22 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity } from "react-native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/FontAwesome";
 
 const BottomMenu = ({ children }) => {
   const navigation = useNavigation();
-  const [activeTab, setActiveTab] = useState("Dashboard");
+  const route = useRoute(); // Get the current route to determine the active tab
+  const [activeTab, setActiveTab] = useState(route.name); // Initialize activeTab with current route name
 
-  const navigate = (route) => {
-    setActiveTab(route);
-    navigation.navigate(route);
+  const navigate = (routeName) => {
+    setActiveTab(routeName);
+    navigation.navigate(routeName);
   };
+
+  useEffect(() => {
+    // Update the activeTab when the route changes
+    setActiveTab(route.name);
+  }, [route.name]);
 
   return (
     <View className="flex-1 bg-gray-200 ">
@@ -103,12 +109,12 @@ const BottomMenu = ({ children }) => {
         >
           <Icon
             name="sign-out"
-            color={activeTab === "Logout" ? "blue" : "gray"}
+            color={activeTab === "Login" ? "blue" : "gray"}
             size={24}
           />
           <Text
             className={`${
-              activeTab === "Logout"
+              activeTab === "Login"
                 ? `text-blue-500 text-xs`
                 : `text-gray-500 text-xs`
             }`}

@@ -1,25 +1,14 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, TextInput, ActivityIndicator, TouchableOpacity } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import Icon from "react-native-vector-icons/FontAwesome";
 import BottomMenu from "../components/BottomMenu";
-import { STUDENT } from "../api/apiURL"; // Import your API URL
+import { STUDENT } from "../api/apiURL";
 import { queryKeys } from "../api/queryKey";
-import { getRequest, patchRequest } from "../api/apiCall";
+import { getRequest } from "../api/apiCall";
 
 const Profile = () => {
-  const [editMode, setEditMode] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const queryClient = useQueryClient();
-
   const [studentId, setStudentId] = useState(null);
   const [adminId, setAdminId] = useState(null);
   const [studentInfo, setStudentInfo] = useState({
@@ -29,6 +18,7 @@ const Profile = () => {
     phoneNumber: "",
     password: "",
   });
+  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
 
   useEffect(() => {
     const fetchIds = async () => {
@@ -45,7 +35,6 @@ const Profile = () => {
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: [queryKeys.getstudent, studentId, adminId],
     queryFn: async () => await getRequest({ url: STUDENT(studentId, adminId) }),
-
     onError: (error) => console.error("Error fetching student data:", error),
   });
 
@@ -60,28 +49,6 @@ const Profile = () => {
       });
     }
   }, [data]);
-
-  const mutation = useMutation({
-    mutationFn: async (updatedStudent) => {
-      console.log(updatedStudent)
-      await patchRequest({ url: STUDENT(studentId, adminId), data: [updatedStudent] });
-    },
-    onSuccess: (data) => {
-      setEditMode(false);
-      queryClient.invalidateQueries({ queryKey: [queryKeys.getstudent] });
-    },
-    onError: (error) => {
-      console.error("Error updating student profile:", error);
-    },
-  });
-
-  const handleChange = (name, value) => {
-    setStudentInfo({ ...studentInfo, [name]: value });
-  };
-
-  const handleSubmit = () => {
-    mutation.mutate({ data: studentInfo });
-  };
 
   if (isLoading) {
     return (
@@ -117,12 +84,9 @@ const Profile = () => {
               First Name
             </Text>
             <TextInput
-              className={`text-base border font-semibold mb-2 text-gray-800 p-2 rounded-lg ${
-                !editMode && `bg-gray-200 border-white`
-              }`}
+              className="text-base border font-semibold mb-2 text-gray-800 p-2 rounded-lg bg-gray-200 border-white"
               value={studentInfo.firstName}
-              onChangeText={(value) => handleChange("firstName", value)}
-              editable={editMode}
+              editable={false}
             />
           </View>
 
@@ -131,12 +95,9 @@ const Profile = () => {
               Last Name
             </Text>
             <TextInput
-              className={`text-base border font-semibold mb-2 text-gray-800 p-2 rounded-lg ${
-                !editMode && `bg-gray-200 border-white`
-              }`}
+              className="text-base border font-semibold mb-2 text-gray-800 p-2 rounded-lg bg-gray-200 border-white"
               value={studentInfo.lastName}
-              onChangeText={(value) => handleChange("lastName", value)}
-              editable={editMode}
+              editable={false}
             />
           </View>
 
@@ -145,12 +106,9 @@ const Profile = () => {
               Email
             </Text>
             <TextInput
-              className={`text-base border font-semibold mb-2 text-gray-800 p-2 rounded-lg ${
-                !editMode && `bg-gray-200 border-white`
-              }`}
+              className="text-base border font-semibold mb-2 text-gray-800 p-2 rounded-lg bg-gray-200 border-white"
               value={studentInfo.email}
-              onChangeText={(value) => handleChange("email", value)}
-              editable={editMode}
+              editable={false}
               keyboardType="email-address"
             />
           </View>
@@ -160,12 +118,9 @@ const Profile = () => {
               Phone
             </Text>
             <TextInput
-              className={`text-base border font-semibold mb-2 text-gray-800 p-2 rounded-lg ${
-                !editMode && `bg-gray-200 border-white`
-              }`}
+              className="text-base border font-semibold mb-2 text-gray-800 p-2 rounded-lg bg-gray-200 border-white"
               value={studentInfo.phoneNumber}
-              onChangeText={(value) => handleChange("phoneNumber", value)}
-              editable={editMode}
+              editable={false}
               keyboardType="phone-pad"
             />
           </View>
@@ -176,51 +131,22 @@ const Profile = () => {
             </Text>
             <View className="flex flex-row items-center">
               <TextInput
-                className={`text-base border font-semibold mb-2 text-gray-800 p-2 rounded-lg w-[70vw] mr-3 ${
-                  !editMode && `bg-gray-200 border-white`
-                }`}
+                className="text-base border font-semibold mb-2 text-gray-800 p-2 rounded-lg w-[70vw] mr-3 bg-gray-200 border-white"
                 value={studentInfo.password}
-                onChangeText={(value) => handleChange("password", value)}
-                editable={editMode}
-                secureTextEntry={!showPassword}
+                editable={false}
+                secureTextEntry={!showPassword} // Toggle password visibility
               />
-              {editMode && (
-                <TouchableOpacity
-                  onPress={() => setShowPassword(!showPassword)}
-                  className=" border p-2 rounded-lg mb-2"
-                >
-                  <Icon
-                    name={showPassword ? "eye-slash" : "eye"}
-                    size={20}
-                    color="gray"
-                  />
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)} // Toggle show/hide password
+                className="border p-2 rounded-lg mb-2"
+              >
+                <Icon
+                  name={showPassword ? "eye-slash" : "eye"}
+                  size={20}
+                  color="gray"
+                />
+              </TouchableOpacity>
             </View>
-          </View>
-
-          <View className="flex flex-row justify-between mt-4">
-            {editMode ? (
-              <>
-                <Button
-                  title="Cancel"
-                  color="#f56565"
-                  onPress={() => setEditMode(false)}
-                />
-                <Button
-                  title="Save Changes"
-                  color="#48bb78"
-                  onPress={handleSubmit}
-                  disabled={mutation.isLoading}
-                />
-              </>
-            ) : (
-              <Button
-                title="Edit Profile"
-                color="#4299e1"
-                onPress={() => setEditMode(true)}
-              />
-            )}
           </View>
         </View>
       </View>
