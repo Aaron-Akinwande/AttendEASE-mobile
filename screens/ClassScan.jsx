@@ -85,19 +85,31 @@ const ScanAttendance = () => {
   // Handle barcode scan
   const handleBarCodeScanned = ({ type, data }) => {
     if (data) {
-      setScanData(data); // Store scan data
-      Alert.alert(
-        "Scanned successfully",
-        `Scanned successfully for class ID: ${classId}`,
-        [
-          {
-            text: "OK",
-            onPress: () => updateAttendance(), // Trigger the mutation to update attendance
-          },
-        ]
-      );
+      const scannedClassId = data; // Assuming the scanned data contains the class ID
+  
+      // Compare scanned class ID with the existing class ID from the route
+      if (scannedClassId === (`class-${classId}`)) {
+        setScanData(data); // Store scan data
+        Alert.alert(
+          "Scanned successfully",
+          `Scanned successfully for class ID: ${classId}`,
+          [
+            {
+              text: "OK",
+              onPress: () => updateAttendance(), // Trigger the mutation to update attendance
+            },
+          ]
+        );
+      } else {
+        // Show alert if the scanned class ID doesn't match the current class ID
+        Alert.alert(
+          "Error",
+          `Scanned class ID (${scannedClassId}) does not match the current class ID (${classId}).`
+        );
+      }
     }
   };
+  
 
   // Handle loading and error states
   if (isLoading) {
