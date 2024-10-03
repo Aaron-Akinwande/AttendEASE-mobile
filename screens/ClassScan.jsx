@@ -3,9 +3,9 @@ import { View, Text, Button, Alert, TouchableOpacity } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import BottomMenu from "../components/BottomMenu";
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRequest, patchRequest } from "../api/apiCall"; // For fetching and patching data
-import { GET_COURSE } from "../api/apiURL"; // API endpoint
+import { GET_COURSE, STUDENT } from "../api/apiURL"; // API endpoint for students and courses
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { queryKeys } from "../api/queryKey";
 
@@ -19,6 +19,7 @@ const ScanAttendance = () => {
   const [studentId, setStudentId] = useState(null);
   const [adminId, setAdminId] = useState(null);
 
+  const queryClient = useQueryClient();
 
   // Fetch student ID from AsyncStorage
   useEffect(() => {
@@ -35,14 +36,14 @@ const ScanAttendance = () => {
 
   // Fetch course details using the courseId from the route
   const { data: courseData, isLoading, isError } = useQuery({
-    queryKey: [queryKeys.getCourseDetails,adminId, classId],
+    queryKey: [queryKeys.getCourseDetails, adminId, classId],
     queryFn: async () => await getRequest({ url: GET_COURSE(adminId, classId) }), // Fetch course details
     enabled: !!classId,
     onError: (error) => console.error("Error fetching course data:", error),
   });
 
-  // Mutation to update attendance when barcode is scanned
-  const { mutate: updateAttendance } = useMutation({
+  // First Mutation: Update attendance in the course data
+  const { mutate: updateAttendanceInCourse } = useMutation({
     mutationFn: async () => {
       const updatedStudents = courseData.students.map((student) => {
         if (student.id === parseInt(studentId)) {
@@ -51,10 +52,8 @@ const ScanAttendance = () => {
         return student;
       });
 
-      // Send PATCH request to update students array in course
-      console.log(updatedStudents)
       await patchRequest({
-        url: GET_COURSE(adminId, classId), // Reusing the same URL
+        url: GET_COURSE(adminId, classId), // Update the course with new student attendance data
         body: {
           ...courseData,
           students: updatedStudents,
@@ -62,14 +61,70 @@ const ScanAttendance = () => {
       });
     },
     onSuccess: () => {
-      Alert.alert("Success", "Attendance updated successfully!");
-      setScanData(null); // Reset scan data after successful update
+      // Invalidate the teacher's course data query to trigger a refetch
+      queryClient.invalidateQueries([queryKeys.getcourse]);
     },
     onError: (error) => {
-      console.error("Error updating attendance:", error);
-      Alert.alert("Error", "Could not update attendance.");
+      console.error("Error updating course attendance:", error);
+      Alert.alert("Error", "Could not update attendance in course.");
     },
   });
+
+  // Second Mutation: Update attendance in the student's courses subarray
+  const { mutate: updateAttendanceInStudent } = useMutation({
+    mutationFn: async () => {
+      // Fetch student data first
+      const studentData = await getRequest({ url: STUDENT(adminId, studentId) });
+      
+      const updatedCourses = studentData.courses.map((course) => {
+        if (course.courseId === classId) {
+          return { ...course, attendedSessions: course.attendedSessions + 1 };
+        }
+        return course;
+      });
+
+      await patchRequest({
+        url: STUDENT(adminId, studentId), // Update the student's data
+        body: {
+          ...studentData,
+          courses: updatedCourses,
+        },
+      });
+    },
+    onError: (error) => {
+      console.error("Error updating student's attendance:", error);
+      Alert.alert("Error", "Could not update attendance in student data.");
+    },
+  });
+
+  // Handle barcode scan
+  const handleBarCodeScanned = ({ type, data }) => {
+    if (data) {
+      const scannedClassId = data; // Assuming the scanned data contains the class ID
+  
+      if (scannedClassId === (`class-${classId}`)) {
+        setScanData(data);
+        Alert.alert(
+          "Scanned successfully",
+          `Scanned successfully for class ID: ${classId}`,
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                updateAttendanceInCourse();
+                updateAttendanceInStudent();
+              },
+            },
+          ]
+        );
+      } else {
+        Alert.alert(
+          "Error",
+          `Scanned class ID (${scannedClassId}) does not match the current class ID (${classId}).`
+        );
+      }
+    }
+  };
 
   // Handle camera permission
   if (!permission) return <View />;
@@ -81,35 +136,6 @@ const ScanAttendance = () => {
       </View>
     );
   }
-
-  // Handle barcode scan
-  const handleBarCodeScanned = ({ type, data }) => {
-    if (data) {
-      const scannedClassId = data; // Assuming the scanned data contains the class ID
-  
-      // Compare scanned class ID with the existing class ID from the route
-      if (scannedClassId === (`class-${classId}`)) {
-        setScanData(data); // Store scan data
-        Alert.alert(
-          "Scanned successfully",
-          `Scanned successfully for class ID: ${classId}`,
-          [
-            {
-              text: "OK",
-              onPress: () => updateAttendance(), // Trigger the mutation to update attendance
-            },
-          ]
-        );
-      } else {
-        // Show alert if the scanned class ID doesn't match the current class ID
-        Alert.alert(
-          "Error",
-          `Scanned class ID (${scannedClassId}) does not match the current class ID (${classId}).`
-        );
-      }
-    }
-  };
-  
 
   // Handle loading and error states
   if (isLoading) {
